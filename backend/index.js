@@ -23,7 +23,10 @@ app.use(cors({
   //   "http://localhost:5173",
   //   "http://172.20.49.227:5173"
   // ],
-  origin:true,
+  origin:{
+    "http://localhost:5173":true,
+    "https://chat-us-fullstack-chat-app.vercel.app/":true
+  },
   credentials:true
 }))
 app.use(bodyParser.urlencoded({extended:true}));
