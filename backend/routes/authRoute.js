@@ -7,7 +7,7 @@ router.post('/verify-otp',authController.verifyOtp);
 router.post('/save-contact',authMiddleWare,authController.saveContact);
 router.get('/logout',authController.logout);
 const multer = require("multer"); // <-- import multer
-const upload = multer({ dest: "tmp/" }); // or memoryStorage 
+const upload = multer({ dest: "/tmp" }); // or memoryStorage 
 
 
 
