@@ -17,7 +17,6 @@ console.log("TEST ENV:", process.env.TWILIO_ACCOUNT_SID);
 
 app.use(express.json());  //parse body datra
 app.use(cookieParser()); //parse tokern
-app.use(errorMiddleware)
 app.use(cors({
   // origin:[
   //   "http://localhost:5173",
@@ -41,6 +40,8 @@ connectToCloudinary();
 //routes
   app.use('/api/auth',authRoute);  //authentication route
   app.use('/api/chat',chatRoute);
+  app.use(errorMiddleware)
+
   app.get('/',(req,res)=>{
     res.send("Server running on port 8000");
   })
