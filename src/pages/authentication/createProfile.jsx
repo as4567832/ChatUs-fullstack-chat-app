@@ -12,11 +12,6 @@ function SetupProfile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // console.log("Token is",token);
-  useEffect(() => {
-  if (token) {
-    navigate("/"); // already logged in → homepage
-  }
-}, [token, navigate])
 
   function handleImageUpload(e) {
     const file = e.target.files[0];

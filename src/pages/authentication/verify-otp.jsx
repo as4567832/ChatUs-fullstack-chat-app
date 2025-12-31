@@ -62,10 +62,10 @@ console.log("Phone suffix is:",phoneSuffix)
     const body = { email, phoneNumber, phoneSuffix, otp: finalOtp };
     const result = await dispatch(verifyOtpThunk(body));
     console.log("otp verify respoonse is:",result);
-    if(result.payload.data.user.userName){
+    if(result.payload.data.user.agreed == true){
       dispatch(setToken(result?.payload?.data?.token));
       localStorage.setItem("token",JSON.stringify(result.payload.data.token));
-      navigate('/');
+      navigate('/'); 
     }
      else{
       localStorage.setItem("token",JSON.stringify(result.payload.data.token));

@@ -86,9 +86,14 @@ export const saveContactThunk = createAsyncThunk(
       );
 
       // ✅ success case
+      if (response.data.status !== "success") {
+        return rejectWithValue(response.data.message);
+      }
       return response.data;
     } catch (error) {
-      console.error("Error while saving contact:", error);
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to save contact"
+      );
     }
   }
 );

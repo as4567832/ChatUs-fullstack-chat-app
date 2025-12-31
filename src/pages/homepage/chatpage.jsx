@@ -19,6 +19,7 @@ import AttachItem from "./documentSendLabel/documentSendLabel";
 
 const ChatPage = () => {
   const { conversationId } = useParams();
+  const isNewChat = conversationId === "new";
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -40,7 +41,7 @@ const ChatPage = () => {
   const { socket, onlineUsers } = useSelector((state) => state.socket);
   const { conversations } = useSelector((state) => state.messages);
   console.log("conversations are:",conversations);
-  console.log("Fetched users are:",users);
+  console.log("Fetched users are:",userDetails);
 
   const isOnline = onlineUsers?.includes(selectedUser?._id);
 
@@ -52,10 +53,11 @@ const ChatPage = () => {
   }, [token, users, dispatch]);
 
   useEffect(() => {
-    if (conversationId) {
+     if (!conversationId || isNewChat) return;
+
       dispatch(getMessagesThunk(conversationId));
-    }
-  }, [token, conversationId, dispatch]);
+
+    }, [conversationId, dispatch]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,8 +72,44 @@ const ChatPage = () => {
     if (!socket) return;
 
     const handleOnlineUsers = (users) => dispatch(setOnlineUsers(users));
+
     const handleNewMessage = (msg) => {
-      if (msg.conversation === conversationId) {
+      // helper to normalize id from either string or populated object
+      const getId = (v) => {
+        if (!v) return null;
+        if (typeof v === "string") return v;
+        if (typeof v === "object") return v._id ? v._id.toString() : (v.toString && v.toString());
+        return String(v);
+      };
+
+      const msgConvId = getId(msg.conversation);
+      const senderId = getId(msg.sender);
+      const recieverId = getId(msg.reciever);
+      const currentConvId = conversationId;
+      const selId = getId(selectedUser?._id);
+      const meId = getId(userDetails?._id);
+
+      // If message belongs to currently opened conversation -> add it
+      if (msgConvId && currentConvId && msgConvId === currentConvId) {
+        dispatch(addNewMessage(msg));
+        return;
+      }
+
+      // If incoming message is between selectedUser and me (covers /chat/new)
+      const isBetweenSelectedAndMe =
+        selId && meId && (
+          (senderId === selId && recieverId === meId) ||
+          (recieverId === selId && senderId === meId)
+        );
+
+      if (isBetweenSelectedAndMe) {
+        // attach conversation id to selectedUser if backend provided it
+        if (msgConvId) {
+          dispatch(setSelectedUser({ ...selectedUser, conversation: { _id: msgConvId } }));
+          if (msgConvId !== currentConvId) {
+            navigate(`/chat/${msgConvId}`);
+          }
+        }
         dispatch(addNewMessage(msg));
       }
     };
@@ -82,7 +120,7 @@ const ChatPage = () => {
       socket.off("onlineUsers", handleOnlineUsers);
       socket.off("newMessage", handleNewMessage);
     };
-  }, [socket, conversationId, dispatch]);
+  }, [socket, conversationId, dispatch, selectedUser, userDetails, navigate]);
 
   // --- Handlers ---
 
@@ -90,6 +128,9 @@ const ChatPage = () => {
     dispatch(setSelectedUser(user));
     if (user.conversation?._id) {
       navigate(`/chat/${user.conversation._id}`);
+    }
+    else{
+      navigate('/chat/new');
     }
   };
 
@@ -126,28 +167,37 @@ const ChatPage = () => {
     const formData = new FormData();
     formData.append("recieverId", selectedUser._id);
 
-    // Logic for sending File vs Text
     if (selectedFile) {
       formData.append("file", selectedFile);
       formData.append("mediaType", mediaType);
-      // If there is a caption, send it as content
-      if (caption.trim() !== "") {
-        formData.append("content", caption);
-      }
+      if (caption.trim() !== "") formData.append("content", caption);
     } else {
       if (!message || message.trim() === "") return;
       formData.append("content", message);
     }
 
-    dispatch(sendMessageThunk(formData));
+    dispatch(sendMessageThunk(formData)).then((res) => {
+      const newConversationId = res?.payload?.data?.conversation;
+      const returnedMessage = res?.payload?.data?.message || res?.payload?.data;
 
-    // Cleanup after send
+      // attach conversation id to selectedUser so UI will use it next time
+      if (newConversationId) {
+        dispatch(setSelectedUser({ ...selectedUser, conversation: { _id: newConversationId } }));
+      }
+
+      // only navigate when we got a valid id and it's different from current route
+      if (newConversationId && newConversationId !== conversationId) {
+        navigate(`/chat/${newConversationId}`);
+      }
+
+      // update messages locally to avoid full refetch/refresh
+      if (returnedMessage) {
+        dispatch(addNewMessage(returnedMessage));
+      }
+    });
+
     setMessage("");
-    closePreview(); // This closes the preview UI
-    
-    setTimeout(() => {
-      dispatch(getMessagesThunk(conversationId));
-    }, 300);
+    closePreview();
   };
 
   return (
@@ -298,6 +348,7 @@ const ChatPage = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-5  flex flex-col gap-2 bg-gradient-to-br from-[#0f2027] via-[#111827] to-black">
               {conversations?.map((msg) => (
+                
           <div
   key={msg._id}
   className={`max-w-[65%] px-3 py-2 text-sm shadow ${
@@ -379,7 +430,7 @@ const ChatPage = () => {
                 className="flex-1 bg-transparent text-white border-none focus:ring-0 text-sm focus:outline-none px-2"
               />
               
-              <button onClick={handleSendMessage} className="p-2 text-white  rounded-full">
+              <button type="button" onClick={handleSendMessage} className="p-2 text-white  rounded-full">
                 <Send size={20} className={message ? "text-green-500" : ""} />
               </button>
             </div>

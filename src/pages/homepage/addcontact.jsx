@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, User, Phone, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { saveContactThunk } from "../../reducer/slices/user/userThunk";
+import { saveContactThunk,getAllUsersThunk } from "../../reducer/slices/user/userThunk";
 
 const AddContactPage = () => {
   const navigate = useNavigate();
@@ -10,6 +10,9 @@ const AddContactPage = () => {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [error,setError] = useState(null);
+  const [loading,setLoading] = useState(null);
+
  
   let userName =null;
   let email  = null;
@@ -27,17 +30,24 @@ const AddContactPage = () => {
   }
 const handleSave = () => {
   if (!phone) return;
+  setError(null);
+  setLoading(true);
 
   dispatch(saveContactThunk(payload))
     .unwrap()
-    .then((res) => {
+    .then(async(res) => {
       console.log("Contact saved:", res);
+      await dispatch(getAllUsersThunk());
       navigate("/"); // ✅ success only
     })
     .catch((err) => {
+      setError(err);
       console.error("Save contact failed:", err);
       //  error case → stay on page
-    });
+    })
+    .finally(()=>{
+      setLoading(false);
+    })
 };
 
 
@@ -106,7 +116,11 @@ const handleSave = () => {
               />
             </div>
           </div>
-
+          {error && (
+  <div className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+    {error}
+  </div>
+)}
           {/* Save Button */}
           <button
             onClick={handleSave}
@@ -114,7 +128,7 @@ const handleSave = () => {
             className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium shadow-md disabled:opacity-50 transition"
           >
             <Save size={16} />
-            Save contact
+             {loading ? "Saving..." : "Save contact"}
           </button>
         </div>
       </div>
