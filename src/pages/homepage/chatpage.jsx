@@ -123,8 +123,8 @@ const ChatPage = () => {
   }, [socket, conversationId, dispatch, selectedUser, userDetails, navigate]);
 
   // --- Handlers ---
-
   const handleUserClick = (user) => {
+      console.log("fetched users for conversation are:.......",user);
     dispatch(setSelectedUser(user));
     if (user.conversation?._id) {
       navigate(`/chat/${user.conversation._id}`);
@@ -204,7 +204,7 @@ const ChatPage = () => {
     <div className="flex h-screen w-full overflow-hidden font-sans text-sm bg-gray-50">
       
       {/* ================= LEFT SIDEBAR (Icons) ================= */}
-      <div className="w-[72px] bg-[#0e1621] flex flex-col items-center py-2 shrink-0">
+<div className="hidden lg:flex w-[72px] bg-[#0e1621] flex-col items-center py-2 shrink-0">
         <button className="p-3 text-gray-400 hover:text-white mb-2">
           <Menu size={24} />
         </button>
@@ -220,7 +220,14 @@ const ChatPage = () => {
       </div>
 
       {/* ================= MIDDLE PANEL (User List) ================= */}
-      <div className="w-80 bg-gradient-to-br from-[#0f2027] via-[#111827] to-black border-r border-gray-200 flex flex-col shrink-0">
+<div
+  className={`
+    bg-gradient-to-br from-[#0f2027] via-[#111827] to-black
+    border-r border-gray-200 flex flex-col shrink-0
+    w-full md:w-80
+    ${selectedUser ? "hidden md:flex" : "flex"}
+  `}
+>
         <div className="h-14  flex items-center justify-between px-4 ">
           <span className="font-semibold text-lg text-white">Chats</span>
           <button onClick={()=>navigate('/add-contact')} className="p-2 rounded-full hover:bg-gray-100 transition">
@@ -257,7 +264,12 @@ const ChatPage = () => {
       </div>
 
       {/* ================= RIGHT PANEL (Chat OR Preview) ================= */}
-      <div className="flex-1 flex flex-col relative bg-[#efe7dd] bg-opacity-30"> 
+<div
+  className={`
+    flex-1 flex flex-col relative bg-[#efe7dd] bg-opacity-30
+    ${!selectedUser ? "hidden md:flex" : "flex"}
+  `}
+>
         {/* Using a WhatsApp-like subtle background color or image if desired */}
 
         {/* CONDITIONAL RENDERING:
@@ -328,22 +340,31 @@ const ChatPage = () => {
           <>
             {/* Chat Header */}
             {selectedUser && (
-              <div className="h-16 bg-gradient-to-br from-[#0f2027] via-[#111827] to-black flex justify-between items-center px-4 shadow-sm z-10">
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500 overflow-hidden">
-                     <img src={selectedUser.profilePicture} className="w-full h-full object-cover" alt="" />
-                  </div>
-                  <div>
-                    <h1 className="font-semibold text-white">{selectedUser.userName || selectedUser.phoneNumber}</h1>
-                    <span className="text-xs text-green-500">{isOnline ? "Online" : "Last seen recently"}</span>
-                  </div>
-                </div>
-                <div className="flex gap-4 text-white">
-                  <Search size={20} />
-                  <MoreVertical size={20} />
-                </div>
-              </div>
-            )}
+  <div className="h-16 bg-gradient-to-br from-[#0f2027] via-[#111827] to-black flex items-center px-4 gap-3 shadow-sm z-10">
+    
+    {/* Mobile Back Button */}
+    <button
+      onClick={() => navigate("/chat")}
+      className="md:hidden text-white"
+    >
+      <ArrowLeft size={22} />
+    </button>
+
+    <div className="flex items-center gap-3 flex-1">
+      <div className="w-10 h-10 rounded-full bg-indigo-500 overflow-hidden">
+        <img src={selectedUser.profilePicture} className="w-full h-full object-cover" />
+      </div>
+      <div>
+        <h1 className="font-semibold text-white text-sm sm:text-base">
+          {selectedUser.userName || selectedUser.phoneNumber}
+        </h1>
+        <span className="text-xs text-green-500">
+          {isOnline ? "Online" : "Last seen recently"}
+        </span>
+      </div>
+    </div>
+  </div>
+)}
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-5  flex flex-col gap-2 bg-gradient-to-br from-[#0f2027] via-[#111827] to-black">
