@@ -344,7 +344,7 @@ const ChatPage = () => {
     
     {/* Mobile Back Button */}
     <button
-      onClick={() => navigate("/chat")}
+      onClick={() => navigate("/")}
       className="md:hidden text-white"
     >
       <ArrowLeft size={22} />
