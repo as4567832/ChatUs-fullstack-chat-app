@@ -1,4 +1,6 @@
-const nodemailer = require("nodemailer");
+const Resend = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 const sendEmailOtp = async (email,otp) => {
     const body = `<div style="background-color: #f4f4f7; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100%;">
@@ -117,25 +119,15 @@ const sendEmailOtp = async (email,otp) => {
   </table>
 </div>`;
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: process.env.MAIL_USER,
+    await resend.emails.send({
+      from: "ChatUs <onboarding@resend.dev>", // ✅ Resend default
       to: email,
-      subject: "Chat us verification code",
+      subject: "ChatUs verification code",
       html: body,
     });
-    return info;
   } catch (error) {
     console.error(error);
+      throw error;
   }
 };
 

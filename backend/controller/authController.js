@@ -29,7 +29,7 @@ const sendOtp = async (req, res) => {
       user.emailOtpExpiry = expiry;
       await user.save();
 
-      await sendEmailOtp(email, otp);
+      await sendEmailOtp(email, otp).catch(console.error);;
 
       return response(res, 200, "OTP sent to your email successfully", {
         email,
