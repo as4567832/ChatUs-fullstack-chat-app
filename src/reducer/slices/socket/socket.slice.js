@@ -13,7 +13,8 @@ const socketSlice = createSlice({
             const socket = io("https://chatus-igfh.onrender.com",{
                 query:{
                     userId:action.payload
-                }
+                },
+                transports: ["websocket"],
             });
 
             state.socket = socket;
