@@ -10,7 +10,7 @@ const socketSlice = createSlice({
     initialState: initialState,
     reducers: {
         initializeSocket:(state,action)=>{
-            const socket = io("http://localhost:8000",{
+            const socket = io("https://chatus-igfh.onrender.com",{
                 query:{
                     userId:action.payload
                 }

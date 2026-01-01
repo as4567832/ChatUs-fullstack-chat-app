@@ -16,7 +16,10 @@ const typingUsers = new Map();
 const initializeSocket = (server) =>{
     const io = new Server(server,{
         cors:{
-            origin:process.env.FRONTEND_URL,
+            origin:[
+                "http://localhost:5173",
+      "https://chatus-igfh.onrender.com"
+            ],
             credentials:true,
             method:['GET','POST','DELETE','OPTIONS'],
         },
