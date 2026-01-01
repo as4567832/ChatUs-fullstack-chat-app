@@ -8,7 +8,9 @@ const io = new Server(server,{
   cors:{
     origin: [
       "http://localhost:5173",
-      "https://chat-us-fullstack-chat-app.vercel.app"
+      "https://chat-us-fullstack-chat-app.vercel.app",
+      "https://chatus-igfh.onrender.com"
+
     ],
   }
 });
