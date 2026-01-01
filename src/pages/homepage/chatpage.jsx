@@ -463,27 +463,3 @@ const ChatPage = () => {
 };
 
 export default ChatPage;
-
-io.on("connection", (socket) => {
-  console.log("connected", socket.id, socket.handshake.auth);
-  const userId = socket.handshake.auth?.userId;
-  if (!userId) return; // don't add undefined
-
-  onlineUsers.set(userId, socket.id);
-  // build array safely
-  const users = Array.from(onlineUsers.keys()).filter(Boolean);
-  io.emit("onlineUsers", users);
-});
-
-export const initializeSocket = (userId) => (dispatch) => {
-  const url = import.meta.env.VITE_SOCKET_URL || "https://your-backend.example.com";
-  const socket = io(url, {
-    path: "/socket.io",
-    transports: ["websocket"],
-    auth: { userId }, // or token: `Bearer ${token}`
-    secure: true,
-    withCredentials: true,
-  });
-
-  // ...existing dispatches to store socket...
-};
