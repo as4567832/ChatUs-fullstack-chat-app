@@ -1,6 +1,5 @@
 const { Resend } = require("resend");
 const resend = new Resend({ apiKey: process.env.RESEND_API_KEY });
-console.log("Resend type:", typeof Resend);
 
 const sendEmailOtp = async (email, otp) => {
   const body = `<div style="background-color: #f4f4f7; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100%;">
